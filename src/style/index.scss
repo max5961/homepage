@@ -6,13 +6,8 @@ $button-color: #0a0014;
     height: 100vh;
     width: 100vw;
 
-    & > * {
-        z-index: 1;
-        position: fixed;
-    }
-
     .background-image {
-        z-index: 0;
+        z-index: -1;
         position: absolute;
         height: 100%;
         width: 100%;
@@ -20,28 +15,61 @@ $button-color: #0a0014;
         background-position: center;
     }
 
-    button.change-background {
-        position: fixed;
-        bottom: 10px;
-        right: 10px;
-        color: green;
-    }
-
-    .choose-backgrounds-ui-container {
-        bottom: 10px;
-
+    .bg-menu-container {
+        width: 100%;
+        height: auto;
+        background-color: #00000095;
         display: flex;
-        flex-direction: row;
-        gap: 20px;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 25px;
+        gap: 25px;
 
-        .backgrounds-container {
+        .bg-images-container {
+            width: 100%;
             display: flex;
-            flex-drection: row;
-            gap: 20px;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            overflow: auto;
+            gap: 25px;
 
-            img {
-                height: 100px;
-                width: 100px;
+            button {
+                margin-bottom: 25px;
+                border: 3px solid #ffffff50;
+                &.chosen {
+                    border: 3px solid #8effff;
+                }
+
+                img {
+                    height: 100px;
+                    width: 175px;
+                    object-fit: cover;
+                }
+            }
+            // not Firefox compatible
+            &::-webkit-scrollbar {
+                height: 25px;
+            }
+            &::-webkit-scrollbar-track-piece {
+                background-color: #ffffff50;
+            }
+            &::-webkit-scrollbar-thumb {
+                background-color: #f5f5f5;
+            }
+        }
+
+        .buttons-container {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+            align-items: flex-end;
+            gap: 25px;
+
+            button {
+                padding: 10px 20px 10px 20px;
+                background-color: white;
             }
         }
     }
