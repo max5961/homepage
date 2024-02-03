@@ -24,6 +24,11 @@ $button-color: #0a0014;
         justify-content: space-between;
         padding: 25px;
         gap: 25px;
+        transition: 300ms opacity ease-in-out;
+
+        &.hidden {
+            opacity: 0;
+        }
 
         .bg-images-container {
             width: 100%;
