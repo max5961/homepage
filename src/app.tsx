@@ -4,13 +4,10 @@ import { backgrounds } from "./backgrounds";
 
 export default function App(): React.ReactElement {
     const [background, setBackground] = useState(backgrounds[0]);
-    function handleImageClick(key: number): void {
-        setBackground(backgrounds[key]);
-    }
     return (
         <div id="content">
             <BackgroundImage background={background} />
-            <HandleBackgroundUI handleImageClick={handleImageClick} />
+            <HandleBackgroundUI setBackground={setBackground} />
         </div>
     );
 }
@@ -30,10 +27,10 @@ function BackgroundImage({
 }
 
 interface HandleBackgroundUIProps {
-    handleImageClick: (index: number) => void;
+    setBackground: (string) => void;
 }
 function HandleBackgroundUI({
-    handleImageClick,
+    setBackground,
 }: HandleBackgroundUIProps): React.ReactElement {
     const [choosing, setChoosing] = useState(false);
 
@@ -52,7 +49,7 @@ function HandleBackgroundUI({
         return (
             <ChooseBackgroundUI
                 handleClick={handleClick}
-                handleImageClick={handleImageClick}
+                setBackground={setBackground}
             />
         );
     }
@@ -60,11 +57,11 @@ function HandleBackgroundUI({
 
 interface ChooseBackgroundUIProps {
     handleClick: () => void;
-    handleImageClick: (index: number) => void;
+    setBackground: (string) => void;
 }
 function ChooseBackgroundUI({
     handleClick,
-    handleImageClick,
+    setBackground,
 }: ChooseBackgroundUIProps): React.ReactElement {
     function getBackgroundsArray(): React.ReactElement[] {
         return backgrounds.map((bg, index) => {
@@ -72,7 +69,7 @@ function ChooseBackgroundUI({
                 <button
                     className="new-bg"
                     key={index}
-                    onClick={() => handleImageClick(index)}
+                    onClick={() => setBackground(backgrounds[index])}
                 >
                     <img src={bg} alt="" key={index} />
                 </button>
