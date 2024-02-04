@@ -76,3 +76,9 @@
 }
 
 // Options Menu
+.default-menu-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 25px;
+}

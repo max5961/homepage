@@ -23,12 +23,14 @@ export default function OptionsMenu({
                     setShowBgMenu={setShowBgMenu}
                 />
             ) : (
-                <button
-                    className="change-background"
-                    onClick={() => setShowBgMenu(!showBgMenu)}
-                >
-                    Change Background
-                </button>
+                <div className="default-menu-container">
+                    <button
+                        className="change-background"
+                        onClick={() => setShowBgMenu(!showBgMenu)}
+                    >
+                        Change Background
+                    </button>
+                </div>
             )}
         </div>
     );
