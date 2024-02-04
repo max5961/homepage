@@ -10,7 +10,7 @@ import bg8 from "./images/bg8.jpg";
 import bg9 from "./images/bg9.jpg";
 import bg10 from "./images/bg10.jpg";
 
-export const backgrounds = [
+export const backgroundUrls = [
     bg0,
     bg1,
     bg2,

@@ -3,21 +3,21 @@ import { useState } from "react";
 import BackgroundSelector from "./BackgroundSelector";
 
 interface OptionsMenuProps {
-    backgrounds: Array<string>;
+    backgroundUrls: Array<string>;
     bgIndex: number;
     setBgIndex: (num: number) => void;
 }
 export default function OptionsMenu({
-    backgrounds,
+    backgroundUrls,
     bgIndex,
     setBgIndex,
 }: OptionsMenuProps): React.ReactElement {
-    const [showBgMenu, setShowBgMenu] = useState<boolean>(true); // set to true for editing scss
+    const [showBgMenu, setShowBgMenu] = useState<boolean>(false);
     return (
-        <>
+        <div className="options-menu-container">
             {showBgMenu ? (
                 <BackgroundSelector
-                    backgrounds={backgrounds}
+                    backgroundUrls={backgroundUrls}
                     bgIndex={bgIndex}
                     setBgIndex={setBgIndex}
                     setShowBgMenu={setShowBgMenu}
@@ -30,6 +30,6 @@ export default function OptionsMenu({
                     Change Background
                 </button>
             )}
-        </>
+        </div>
     );
 }

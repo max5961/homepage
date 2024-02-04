@@ -2,13 +2,13 @@ import React from "react";
 import { useState, useEffect } from "react";
 
 interface BackgroundSelectorProps {
-    backgrounds: Array<string>;
+    backgroundUrls: Array<string>;
     bgIndex: number;
     setBgIndex: (num: number) => void;
     setShowBgMenu: (bool: boolean) => void;
 }
 export default function BackgroundSelector({
-    backgrounds,
+    backgroundUrls,
     bgIndex,
     setBgIndex,
     setShowBgMenu,
@@ -48,8 +48,8 @@ export default function BackgroundSelector({
 
         // chosen image always appears at front of images
         // move chosen URL to front of containing array
-        const chosenUrl: string = backgrounds.splice(nextIndex, 1)[0];
-        backgrounds.unshift(chosenUrl);
+        const chosenUrl: string = backgroundUrls.splice(nextIndex, 1)[0];
+        backgroundUrls.unshift(chosenUrl);
 
         setBgIndex(0);
         setShowBgMenu(false);
@@ -58,7 +58,7 @@ export default function BackgroundSelector({
     function getBgElements(): Array<React.ReactElement> {
         const imageElems: React.ReactElement[] = [];
 
-        for (let i = 0; i < backgrounds.length; i++) {
+        for (let i = 0; i < backgroundUrls.length; i++) {
             const className: string =
                 i === nextIndex ? "bg-tile chosen" : "bg-tile";
 
@@ -68,7 +68,7 @@ export default function BackgroundSelector({
                     onClick={() => handleImageClick(i)}
                     key={i}
                 >
-                    <img src={backgrounds[i]} key={i} alt="" />
+                    <img src={backgroundUrls[i]} key={i} alt="" />
                 </button>
             );
 
