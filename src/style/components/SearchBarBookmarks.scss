@@ -66,10 +66,9 @@ section.search {
         }
     }
     ul.search-engines-drop-down {
+        background-color: globals.$white;
         display: grid;
         grid-template-rows: repeat(auto, 1fr);
-        gap: 2px;
-        background-color: darken(globals.$white, 10%); // for gaps in list items
         height: 0;
         overflow: hidden;
         transition: 100ms height linear;
@@ -81,7 +80,6 @@ section.search {
         li {
             width: 100%;
             flex-grow: 1;
-            background-color: globals.$white;
 
             button {
                 display: flex;
