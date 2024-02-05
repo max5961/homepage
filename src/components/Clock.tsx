@@ -7,7 +7,12 @@ export default function Clock(): React.ReactElement {
     const [timeCB, setTimeCB] = useState<() => string>(() => getTime);
 
     function getTime(): string {
-        return new Date().toLocaleTimeString();
+        const time: string = new Date().toLocaleTimeString();
+        const noSuffix = time.match(/\d+:\d+:\d+/g);
+        if (noSuffix && noSuffix[0]) {
+            return noSuffix[0];
+        }
+        return time;
     }
     function getFakeTime(): string {
         return new Date().toISOString();
@@ -16,6 +21,7 @@ export default function Clock(): React.ReactElement {
     // Clicking one of the time format buttons changes the callback that gets
     //+ the time.
     function changeFormat(newTimeCB: () => string): void {
+        // change the formatter for next time the interval formats the time
         setTimeCB(() => newTimeCB);
 
         // setState does not update state synchronously.  Therefore, using
