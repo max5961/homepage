@@ -1,3 +1,4 @@
+@use "../globals";
 // Options Menu & Background Image Selector
 
 // contains both components
@@ -7,16 +8,17 @@
 
     button {
         padding: 10px 20px 10px 20px;
-        background-color: white;
+        background-color: globals.$white;
     }
 }
 
 // Background Image Selector
+
 .bg-menu-container {
     width: 100%;
     height: auto;
-    background-color: #4040409b;
-    border: 3px solid #8080809b;
+    background-color: globals.$transparent-bg;
+    border: globals.$transparent-bg-border;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -41,9 +43,9 @@
         button.bg-tile {
             padding: 0;
             margin-bottom: 30px;
-            border: 5px solid #8080809c;
+            border: globals.$transparent-bg-border;
             &.chosen {
-                border: 5px solid #14b81480;
+                border: 3px solid #7bfa72cc;
             }
 
             img {
@@ -61,7 +63,7 @@
             background-color: #ffffff4d;
         }
         &::-webkit-scrollbar-thumb {
-            background-color: #d4d4d4ff;
+            background-color: globals.$white;
         }
     }
 

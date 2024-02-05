@@ -1,4 +1,6 @@
-button {
-    padding: 10px 20px 10px 20px;
-    background-color: white;
-}
+$white: #f5f5f5ff;
+$white-hover: darken($white, 10%);
+$white-active: darken($white-hover, 10%);
+$transparent-bg: #4040409b;
+$transparent-bg-border: 2px solid lighten($transparent-bg, 10%);
+$full-transparent-bg: #00000000;

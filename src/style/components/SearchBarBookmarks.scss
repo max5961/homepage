@@ -1,3 +1,5 @@
+@use "../globals";
+
 .center-container {
     // border: 2px solid blue;
     width: 650px;
@@ -10,29 +12,101 @@
     right: 0;
 }
 
-form.search {
-    background-color: #f5f5f5ff;
-    width: 100%;
-    height: auto;
-    padding: 10px 25px 10px 25px;
+section.search {
     display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 25px;
-
-    input[type="text"] {
-        background-color: #00000000;
-        border-color: #00000000;
+    flex-direction: column;
+    align-items: flex-start;
+    img {
+        width: 20px;
     }
 
-    .search-engines-container {
-        width: 25px;
-        ul.search-engines-list {
-            overflow: hidden;
-            height: 0;
+    .search-bar-container {
+        background-color: globals.$white;
+        width: 100%;
+        height: 60px;
+        padding: 10px 25px 10px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 5px;
 
-            &.visible {
-                height: auto;
+        button.show-search-engines {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 5px;
+
+            img.down-caret {
+                transition: 100ms transform ease-in-out;
+                &.inverted {
+                    transform: rotate(180deg);
+                }
+            }
+        }
+
+        form.search {
+            display: flex;
+            flex-grow: 1;
+
+            button.go-search img {
+                transition: 100ms transform ease-in-out;
+                &:hover {
+                    transform: scale(1.1);
+                }
+                &:active {
+                    transform: scale(1.12);
+                }
+            }
+
+            input[type="text"] {
+                background-color: globals.$full-transparent-bg;
+                border-color: globals.$full-transparent-bg;
+                width: 100%;
+            }
+        }
+    }
+    ul.search-engines-drop-down {
+        background-color: globals.$white;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        height: 0;
+        overflow: hidden;
+        transition: 100ms height linear;
+        z-index: 101;
+
+        &.visible {
+            height: 275px;
+        }
+        li {
+            width: 100%;
+            flex-grow: 1;
+
+            button {
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                width: 100%;
+                height: 100%;
+                gap: 10px;
+                padding: 10px 25px 10px 25px;
+
+                &:hover {
+                    background-color: globals.$white-hover;
+                }
+                &:active {
+                    background-color: globals.$white-active;
+                }
+
+                img.check-icon {
+                    opacity: 0;
+
+                    // commented out for styling
+                    &.visible {
+                        opacity: 1;
+                    }
+                }
             }
         }
     }
