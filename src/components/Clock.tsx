@@ -29,11 +29,11 @@ class FormatClock {
     }
 
     getHour1_12(): string {
-        return format(this.date, "K");
+        return format(this.date, "h");
     }
 
-    getHour1_24(): string {
-        return format(this.date, "k");
+    getHour0_23(): string {
+        return format(this.date, "H");
     }
 
     getMinutes(): string {
@@ -144,7 +144,7 @@ export default function Clock(): React.ReactElement {
 
         const hour = clockState.show12Hour
             ? formatClock.getHour1_12()
-            : formatClock.getHour1_24();
+            : formatClock.getHour0_23();
         const minute = formatClock.getMinutes();
         const second = clockState.showSeconds ? formatClock.getSeconds() : "";
         const ampm = clockState.showAMPM ? formatClock.getAMPM() : "";
@@ -182,7 +182,7 @@ export default function Clock(): React.ReactElement {
                     </p>
                 </button>
 
-                <FormatTime />
+                <FormatDate />
             </div>
         </ClockContext.Provider>
     );
@@ -219,9 +219,9 @@ function FormatDate(): React.ReactElement {
 
     function getListItems(): React.ReactElement[] {
         const formatClock: FormatClock = new FormatClock(clockState.date);
-
         const components: React.ReactElement[] = [];
         for (let i = 0; i < formatClock.options.length; i++) {
+            const [mouseOver, setMouseOver] = useState<boolean>(false);
             const component: React.ReactElement = (
                 <li key={i}>
                     <button
@@ -233,6 +233,10 @@ function FormatDate(): React.ReactElement {
                             <img src={checkmarkIcon} alt="checkmark" />
                         )}
                     </button>
+                    <div
+                        onMouseOver={() => setMouseOver(true)}
+                        className={`roll-border ${mouseOver && "visible"}`}
+                    ></div>
                 </li>
             );
             components.push(component);
@@ -244,32 +248,44 @@ function FormatDate(): React.ReactElement {
         <div className="format-container date-container">
             <div className="divider"></div>
             <ul>{getListItems()}</ul>
-            <ApplyCancelButtons />
         </div>
     );
 }
 function FormatTime(): React.ReactElement {
+    interface ItemData {
+        spanText: string;
+        className: string;
+        action: { type: string };
+    }
+    const items: ItemData[] = [
+        {
+            spanText: "Show AM/PM",
+            className: "option show-suffix",
+            action: { type: "toggle AM/PM" },
+        },
+        {
+            spanText: "24 hour time",
+            className: "option show-24-hour",
+            action: { type: "toggle 12 hour" },
+        },
+        {
+            spanText: "Show seconds",
+            className: "option show-24-hour",
+            action: { type: "toggle seconds" },
+        },
+    ];
+
     return (
         <div className="format-container time-container">
             <ul>
-                <li>
-                    <div className="option show-suffix">
-                        <span>Show AM/PM</span>
-                        <CheckBoxSlider action={{ type: "toggle AM/PM" }} />
-                    </div>
-                </li>
-                <li>
-                    <div className="option show-24-hour">
-                        <span>24 hour time</span>
-                        <CheckBoxSlider action={{ type: "toggle 12 hour" }} />
-                    </div>
-                </li>
-                <li>
-                    <div className="option show-seconds">
-                        <span>Show seconds</span>
-                        <CheckBoxSlider action={{ type: "toggle seconds" }} />
-                    </div>
-                </li>
+                {items.map((item, index) => {
+                    return (
+                        <div key={index} className={item.className}>
+                            <span>{item.spanText}</span>
+                            <CheckBoxSlider action={item.action} />
+                        </div>
+                    );
+                })}
             </ul>
             <ApplyCancelButtons />
         </div>
