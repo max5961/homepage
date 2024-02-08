@@ -86,11 +86,11 @@ export default function BackgroundSelector({
         >
             <div className="bg-images-container">{getBgElements()}</div>
             <div className="buttons-container">
-                <button className="apply-changes" onClick={handleApplyClick}>
-                    Apply
-                </button>
                 <button className="cancel-changes" onClick={handleCancelClick}>
                     Cancel
+                </button>
+                <button className="apply-changes" onClick={handleApplyClick}>
+                    Apply
                 </button>
             </div>
         </div>

@@ -1,8 +1,146 @@
 @use "../globals";
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap");
+// font-family: "Inter", sans-serif
+$main-font: "Inter", sans-serif;
 
-.clock-container {
-    background-color: pink;
-    height: 200px;
-    width: 300px;
+.time-date-component {
+    &.editing {
+        background-color: globals.$white;
+    }
+
     align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 350px;
+
+    button.time-date-container {
+        font-family: $main-font;
+        color: black;
+        margin: 20px;
+        width: 100%;
+
+        .format-message-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+            opacity: 0;
+
+            &.editing {
+                opacity: 1;
+
+                span {
+                    font-size: 14px;
+                }
+
+                img {
+                    width: 25px;
+                }
+            }
+        }
+
+        p.time {
+            font-size: 50px;
+        }
+
+        p.date {
+            font-size: 20px;
+        }
+    }
+
+    .format-container.date-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 5px;
+        height: auto;
+        max-height: 1000px; // for max-height transition;
+
+        .divider {
+            align-self: center;
+            height: 2px;
+            width: 95%;
+            background-color: #00000050;
+            margin-bottom: 5px;
+        }
+
+        ul {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+
+            li {
+                height: 50px;
+                button {
+                    height: 100%;
+                    width: 100%;
+                    font-size: 15px;
+                    font-weight: 500;
+                    transition: 100ms all ease-in-out;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+
+                    img {
+                        height: 20px;
+                    }
+                    img,
+                    p {
+                        padding-left: 20px;
+                        padding-right: 20px;
+                    }
+
+                    &:hover {
+                        background-color: darken(globals.$white, 10%);
+                    }
+                }
+            }
+        }
+    }
+
+    .format-container.time-container {
+        width: 100%;
+        img {
+            height: 10px;
+        }
+        ul {
+            width: 100%;
+        }
+        li {
+            width: 100%;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        .option {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        button.checkbox-slider {
+            height: 40px;
+            width: 70px;
+            padding: 5px;
+            background-color: lightgreen;
+            display: flex;
+            justify-content: flex-start;
+
+            .slider-switch {
+                width: 30px;
+                height: 30px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-color: pink;
+                transition: 100ms transform ease-in-out;
+                &.on {
+                    transform: translate(100%);
+                }
+            }
+        }
+    }
 }
