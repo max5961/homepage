@@ -10,7 +10,11 @@ $main-font: "Inter", sans-serif;
 $time-font: "Protest Strike", sans-serif;
 $edit-bg: globals.$white;
 
-.time-date-component {
+/* The #clock element has two main containers: 1. A live view of the real
+ * time and date.  2. A hidden drop down that is revelaed when the time and date
+ * (styled as a button) is clicked.  This toggles the #clock into edit mode, 
+ *  allowing for the user to format the time and date. */
+#clock {
     width: 350px;
     color: globals.$white;
     font-family: $main-font;
@@ -19,21 +23,19 @@ $edit-bg: globals.$white;
     align-items: center;
     justify-content: flex-start;
 
-    &.edit {
+    // change background color when editing clock
+    &.edit-clock {
         background-color: $edit-bg;
         color: #0a0a0a;
     }
 
-    & > * {
-        width: 100%;
-    }
-
-    img {
+    & img {
         width: 20px;
     }
 }
 
-button.time-date-container {
+// Live view of time and date
+button.time-date {
     width: 100%;
     height: auto;
     display: grid;
@@ -48,17 +50,12 @@ button.time-date-container {
         transition: 500ms opacity ease-in-out;
     }
 
-    &:hover .edit-tool-tip {
+    // edit-tool-tip is toggled to visible only when NOT in edit-mode
+    &:hover .edit-tool-tip.visible {
         opacity: 1;
-        &.hidden {
-            opacity: 1;
-        }
     }
-    &:active .edit-tool-tip {
+    &:active .edit-tool-tip.visible {
         opacity: 0.85;
-        &.hidden {
-            opacity: 1;
-        }
     }
 
     p.time {
@@ -70,12 +67,14 @@ button.time-date-container {
     }
 }
 
-.drop-down-wrapper {
+/* A drop down containining 2 sub drop downs.  The drop down and the sub drop 
+ * downs can both be toggled active */
+.drop-down-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
     max-height: 0;
-    user-select: none;
     overflow: hidden;
     transition: 500ms max-height ease-in-out;
 
@@ -83,51 +82,58 @@ button.time-date-container {
         height: auto;
         max-height: 2000px;
     }
+}
 
-    button {
-        width: 100%;
-        height: 50px;
+// inside of .drop-down-container
+.sub-drop-down-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 50px;
+    height: auto;
+    overflow: hidden;
+    position: relative;
+}
+
+// inside of .sub-drop-down-container
+.format-button-wrapper {
+    $wrapper-bg-active: #00fff8;
+    $wrapper-bg: darken($wrapper-bg-active, 10%);
+    $button-bg: #42899e;
+
+    width: 100%;
+    background-color: $wrapper-bg;
+    transition: 300ms background-color ease-in-out;
+    &.active {
+        background-color: $wrapper-bg-active;
     }
 
-    .format-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
+    button.format-button {
         height: 50px;
-        height: auto;
-        overflow: hidden;
-        position: relative;
+        width: 100%;
+        background-color: $button-bg;
+        transition: 100ms all ease-in-out;
+        &:hover {
+            margin-left: 5px;
 
-        .format-button-wrapper {
-            width: 100%;
-            background-color: darken(#00fff8, 10%);
-            transition: 300ms background-color ease-in-out;
-            &.active {
-                background-color: #00fff8;
+            & + .underline {
+                height: 4px;
+                width: 100%;
+                background-color: $wrapper-bg-active;
             }
         }
-        button.format-button {
-            background-color: #42899e;
-            transition: 100ms all ease-in-out;
-            &:hover {
-                margin-left: 5px;
-
-                & + .underline {
-                    height: 4px;
-                    width: 100%;
-                    background-color: #00fff8;
-                }
-            }
-            &.active {
-                margin-left: 20px;
-            }
+        /* .active NOT :active psuedo-class.  When active, it means the current
+         * button is chosen 
+         */
+        &.active {
+            margin-left: 20px;
         }
     }
     .underline {
         width: 0;
-        background-color: #00fff8;
+        background-color: $wrapper-bg-active;
         align-self: flex-start;
         transition: 300ms width ease-in-out;
         &.active {
@@ -135,80 +141,83 @@ button.time-date-container {
             width: 100%;
         }
     }
-    .sub-drop-down-wrapper {
-        height: auto;
+}
+
+.ul-wrapper {
+    $ul-bg: #7996c3;
+
+    height: auto;
+    width: 100%;
+    color: black;
+    background-color: $ul-bg;
+    max-height: 0;
+
+    &.active {
+        max-height: 2000px;
+    }
+
+    ul {
         width: 100%;
-        color: globals.$white;
-        background-color: #7996c3;
-        max-height: 0;
+        display: flex;
+        flex-direction: column;
 
-        &.active {
-            max-height: 2000px;
-        }
-
-        ul {
+        button {
             width: 100%;
             display: flex;
-            flex-direction: column;
-
-            button {
-                width: 100%;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 0 10px 0 30px;
-                &:hover {
-                    background-color: #00000020;
-                }
-                &:active {
-                    background-color: #00000025;
-                }
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px 0 30px;
+            &:hover {
+                background-color: #00000020;
+            }
+            &:active {
+                background-color: #00000025;
             }
         }
+    }
 
-        ul.choose-time-format {
-            width: 100%;
+    ul.choose-time-format {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        li {
+            margin-left: 30px;
             display: flex;
-            flex-direction: column;
-            gap: 5px;
+            justify-content: space-between;
+            align-items: center;
 
-            li {
-                margin-left: 30px;
+            button.checkbox-slider {
+                width: 70px;
+                height: 40px;
+                background-color: pink;
                 display: flex;
-                justify-content: space-between;
+                flex-direction: row;
                 align-items: center;
+                justify-content: flex-start;
+                border-radius: 40px;
+                padding: 5px;
 
-                button.checkbox-slider {
-                    width: 70px;
-                    height: 40px;
-                    background-color: pink;
+                .slider-switch {
+                    height: 30px;
+                    width: 30px;
+                    border-radius: 50%;
                     display: flex;
-                    flex-direction: row;
+                    justify-content: center;
                     align-items: center;
-                    justify-content: flex-start;
-                    border-radius: 40px;
-                    padding: 5px;
+                    background-color: green;
+                    transition: 100ms transform ease-in-out;
+                    img {
+                        opacity: 0;
+                        transition: 100ms opacity ease-in-out;
+                    }
 
-                    .slider-switch {
-                        height: 30px;
-                        width: 30px;
-                        border-radius: 50%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        background-color: green;
-                        transition: 100ms transform ease-in-out;
+                    &.on {
                         img {
-                            opacity: 0;
-                            transition: 100ms opacity ease-in-out;
+                            opacity: 1;
                         }
-
-                        &.on {
-                            img {
-                                opacity: 1;
-                            }
-                            transform: translateX(100%);
-                        }
+                        transform: translateX(100%);
                     }
                 }
             }

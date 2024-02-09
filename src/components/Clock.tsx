@@ -172,12 +172,8 @@ export default function Clock(): React.ReactElement {
         return () => clearInterval(interval);
     }, []);
 
-    function getWrapperClassName(): string {
-        if (editActive) {
-            return "time-date-component edit";
-        } else {
-            return "time-date-component";
-        }
+    function toggleClass(): string {
+        return editActive ? "edit-clock" : "";
     }
 
     return (
@@ -189,7 +185,7 @@ export default function Clock(): React.ReactElement {
                 setEditActive,
             }}
         >
-            <div className={getWrapperClassName()}>
+            <div id="clock" className={toggleClass()}>
                 <TimeAndDate />
                 <DropDown editActive={editActive} />
             </div>
@@ -204,9 +200,9 @@ function TimeAndDate(): React.ReactElement {
     }
     const { clockState, editActive, setEditActive } = clockContext;
 
-    function getDate(dateFormatIndex: number): string {
+    function getDate(): string {
         const formatClock: FormatClock = new FormatClock(clockState.date);
-        return formatClock.getDate(dateFormatIndex);
+        return formatClock.getDate(clockState.dateFormatIndex);
     }
 
     function getTime(): string {
@@ -225,24 +221,21 @@ function TimeAndDate(): React.ReactElement {
 
     // if not actively editing the clock do not show the tool tip on hover
     function getFormatClassName(): string {
-        return editActive ? "edit-tool-tip hidden" : "edit-tool-tip";
+        return editActive ? "edit-tool-tip" : "edit-tool-tip visible";
     }
 
     return (
-        <button
-            onClick={() => setEditActive(true)}
-            className="time-date-container"
-        >
+        <button onClick={() => setEditActive(true)} className="time-date">
             <p className={getFormatClassName()}>
                 <img
                     src={formatClockIcon}
-                    alt="gear-icon"
-                    className="gear-icon"
+                    alt="format-icon"
+                    className="format-icon"
                 />
                 <span className="format-message">Format Time and Date</span>
             </p>
             <p className="time">{getTime()}</p>
-            <p className="date">{getDate(clockState.dateFormatIndex)}</p>
+            <p className="date">{getDate()}</p>
         </button>
     );
 }
@@ -271,9 +264,9 @@ function DropDown({ editActive }: { editActive: boolean }): React.ReactElement {
     }
 
     return (
-        <div className={toggleActive(editActive, "drop-down-wrapper")}>
-            {" "}
-            <div className="format-wrapper">
+        <div className={toggleActive(editActive, "drop-down-container")}>
+            <div className="sub-drop-down-container">
+                {/* format-button-wrapper */}
                 <div
                     className={toggleActive(
                         timeActive,
@@ -296,16 +289,11 @@ function DropDown({ editActive }: { editActive: boolean }): React.ReactElement {
                         className={toggleActive(timeActive, "underline")}
                     ></div>
                 </div>
-                <div
-                    className={toggleActive(
-                        timeActive,
-                        "sub-drop-down-wrapper",
-                    )}
-                >
+                <div className={toggleActive(timeActive, "ul-wrapper")}>
                     <FormatTime />
                 </div>
             </div>
-            <div className="format-wrapper">
+            <div className="sub-drop-down-container">
                 <div
                     className={toggleActive(
                         dateActive,
@@ -328,12 +316,7 @@ function DropDown({ editActive }: { editActive: boolean }): React.ReactElement {
                         className={toggleActive(dateActive, "underline")}
                     ></div>
                 </div>
-                <div
-                    className={toggleActive(
-                        dateActive,
-                        "sub-drop-down-wrapper",
-                    )}
-                >
+                <div className={toggleActive(dateActive, "ul-wrapper")}>
                     <FormatDate />
                 </div>
             </div>
@@ -348,7 +331,7 @@ function FormatDate(): React.ReactElement {
     }
     const { clockState, clockDispatch, editActive } = context;
 
-    if (!editActive) return <></>; // return early if nothing if being edited
+    if (!editActive) return <></>; // return early if nothing is being edited
 
     function handleClick(dateFormatIndex: number): void {
         const actionTypes: ActionType[] = [
@@ -404,7 +387,7 @@ function FormatTime(): React.ReactElement {
     }
     const { editActive, clockState, clockDispatch } = clockContext;
 
-    if (!editActive) return <></>; // return early if nothing if being edited
+    if (!editActive) return <></>; // return early if nothing is being edited
 
     function handleDispatch(className: string) {
         if (className === "option show-suffix") {
@@ -444,21 +427,18 @@ function FormatTime(): React.ReactElement {
         {
             spanText: "Show AM/PM",
             className: "option show-suffix",
-            // action: { type: "toggle AM/PM" },
             handleDispatch: () => handleDispatch("option show-suffix"),
             clockState: clockState.showAMPM,
         },
         {
             spanText: "24 hour time",
             className: "option show-24-hour",
-            // action: { type: "toggle 24 hour" },
             handleDispatch: () => handleDispatch("option show-24-hour"),
             clockState: clockState.show24Hour,
         },
         {
             spanText: "Show seconds",
             className: "option show-seconds",
-            // action: { type: "toggle seconds" },
             handleDispatch: () => handleDispatch("option show-seconds"),
             clockState: clockState.showSeconds,
         },
