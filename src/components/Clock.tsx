@@ -147,8 +147,8 @@ function clockReducer(state: ClockState, action: { type: string }): ClockState {
 interface ClockContext {
     clockState: ClockState;
     clockDispatch: (action: { type: string }) => void;
-    editActive: boolean;
-    setEditActive: (bool: boolean) => void;
+    ddExpanded: boolean;
+    setDdExpanded: (bool: boolean) => void;
 }
 const ClockContext = createContext<ClockContext | null>(null);
 
@@ -162,7 +162,9 @@ export default function Clock(): React.ReactElement {
         dateFormatIndex: 0,
     });
 
-    const [editActive, setEditActive] = useState<boolean>(false);
+    /* drop down is toggled when the user clicks the TimeAndDate component which
+     * is styled as a button */
+    const [ddExpanded, setDdExpanded] = useState<boolean>(false);
 
     // update the clock time/date every second
     useEffect(() => {
@@ -173,7 +175,7 @@ export default function Clock(): React.ReactElement {
     }, []);
 
     function toggleClass(): string {
-        return editActive ? "edit-clock" : "";
+        return ddExpanded ? "edit-clock" : "";
     }
 
     return (
@@ -181,13 +183,13 @@ export default function Clock(): React.ReactElement {
             value={{
                 clockState,
                 clockDispatch,
-                editActive,
-                setEditActive,
+                ddExpanded,
+                setDdExpanded,
             }}
         >
             <div id="clock" className={toggleClass()}>
                 <TimeAndDate />
-                <DropDown editActive={editActive} />
+                <DropDown ddExpanded={ddExpanded} />
             </div>
         </ClockContext.Provider>
     );
@@ -198,7 +200,7 @@ function TimeAndDate(): React.ReactElement {
     if (!clockContext) {
         throw new Error("Context not set");
     }
-    const { clockState, editActive, setEditActive } = clockContext;
+    const { clockState, ddExpanded, setDdExpanded } = clockContext;
 
     function getDate(): string {
         const formatClock: FormatClock = new FormatClock(clockState.date);
@@ -221,11 +223,11 @@ function TimeAndDate(): React.ReactElement {
 
     // if not actively editing the clock do not show the tool tip on hover
     function getFormatClassName(): string {
-        return editActive ? "edit-tool-tip" : "edit-tool-tip visible";
+        return ddExpanded ? "edit-tool-tip" : "edit-tool-tip visible";
     }
 
     return (
-        <button onClick={() => setEditActive(true)} className="time-date">
+        <button onClick={() => setDdExpanded(true)} className="time-date">
             <p className={getFormatClassName()}>
                 <img
                     src={formatClockIcon}
@@ -240,13 +242,13 @@ function TimeAndDate(): React.ReactElement {
     );
 }
 
-function DropDown({ editActive }: { editActive: boolean }): React.ReactElement {
-    const [dateActive, setDateActive] = useState<boolean>(false);
-    const [timeActive, setTimeActive] = useState<boolean>(false);
+function DropDown({ ddExpanded }: { ddExpanded: boolean }): React.ReactElement {
+    const [dateExpanded, setDateExpanded] = useState<boolean>(false);
+    const [timeExpanded, setTimeExpanded] = useState<boolean>(false);
 
     // toggles an existing className to className.active
-    function toggleActive(active: boolean, fClass: string): string {
-        return active ? `${fClass} active` : fClass;
+    function toggleActive(expanded: boolean, fClass: string): string {
+        return expanded ? `${fClass} expanded` : fClass;
     }
 
     // only allow one tab open at a time
@@ -264,59 +266,59 @@ function DropDown({ editActive }: { editActive: boolean }): React.ReactElement {
     }
 
     return (
-        <div className={toggleActive(editActive, "drop-down-container")}>
+        <div className={toggleActive(ddExpanded, "drop-down-container")}>
             <div className="sub-drop-down-container">
                 {/* format-button-wrapper */}
                 <div
                     className={toggleActive(
-                        timeActive,
+                        timeExpanded,
                         "format-button-wrapper",
                     )}
                 >
                     <button
                         onClick={() =>
                             handleClick(
-                                timeActive,
-                                setTimeActive,
-                                setDateActive,
+                                timeExpanded,
+                                setTimeExpanded,
+                                setDateExpanded,
                             )
                         }
-                        className={toggleActive(timeActive, "format-button")}
+                        className={toggleActive(timeExpanded, "format-button")}
                     >
                         Format Time
                     </button>
                     <div
-                        className={toggleActive(timeActive, "underline")}
+                        className={toggleActive(timeExpanded, "underline")}
                     ></div>
                 </div>
-                <div className={toggleActive(timeActive, "ul-wrapper")}>
+                <div className={toggleActive(timeExpanded, "ul-wrapper")}>
                     <FormatTime />
                 </div>
             </div>
             <div className="sub-drop-down-container">
                 <div
                     className={toggleActive(
-                        dateActive,
+                        dateExpanded,
                         "format-button-wrapper",
                     )}
                 >
                     <button
                         onClick={() =>
                             handleClick(
-                                dateActive,
-                                setDateActive,
-                                setTimeActive,
+                                dateExpanded,
+                                setDateExpanded,
+                                setTimeExpanded,
                             )
                         }
-                        className={toggleActive(dateActive, "format-button")}
+                        className={toggleActive(dateExpanded, "format-button")}
                     >
                         Format Date
                     </button>
                     <div
-                        className={toggleActive(dateActive, "underline")}
+                        className={toggleActive(dateExpanded, "underline")}
                     ></div>
                 </div>
-                <div className={toggleActive(dateActive, "ul-wrapper")}>
+                <div className={toggleActive(dateExpanded, "ul-wrapper")}>
                     <FormatDate />
                 </div>
             </div>
@@ -329,9 +331,9 @@ function FormatDate(): React.ReactElement {
     if (!context) {
         throw new Error("Context not created");
     }
-    const { clockState, clockDispatch, editActive } = context;
+    const { clockState, clockDispatch, ddExpanded } = context;
 
-    if (!editActive) return <></>; // return early if nothing is being edited
+    if (!ddExpanded) return <></>; // return early if nothing is being edited
 
     function handleClick(dateFormatIndex: number): void {
         const actionTypes: ActionType[] = [
@@ -385,9 +387,9 @@ function FormatTime(): React.ReactElement {
     if (!clockContext) {
         throw new Error("Context not found");
     }
-    const { editActive, clockState, clockDispatch } = clockContext;
+    const { ddExpanded, clockState, clockDispatch } = clockContext;
 
-    if (!editActive) return <></>; // return early if nothing is being edited
+    if (!ddExpanded) return <></>; // return early if nothing is being edited
 
     function handleDispatch(className: string) {
         if (className === "option show-suffix") {

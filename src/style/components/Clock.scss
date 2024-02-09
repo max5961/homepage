@@ -78,7 +78,7 @@ button.time-date {
     overflow: hidden;
     transition: 500ms max-height ease-in-out;
 
-    &.active {
+    &.expanded {
         height: auto;
         max-height: 2000px;
     }
@@ -99,15 +99,15 @@ button.time-date {
 
 // inside of .sub-drop-down-container
 .format-button-wrapper {
-    $wrapper-bg-active: #00fff8;
-    $wrapper-bg: darken($wrapper-bg-active, 10%);
+    $wrapper-bg-chosen: #00fff8;
+    $wrapper-bg: darken($wrapper-bg-chosen, 10%);
     $button-bg: #42899e;
 
     width: 100%;
     background-color: $wrapper-bg;
     transition: 300ms background-color ease-in-out;
-    &.active {
-        background-color: $wrapper-bg-active;
+    &.expanded {
+        background-color: $wrapper-bg-chosen;
     }
 
     button.format-button {
@@ -121,22 +121,19 @@ button.time-date {
             & + .underline {
                 height: 4px;
                 width: 100%;
-                background-color: $wrapper-bg-active;
+                background-color: $wrapper-bg-chosen;
             }
         }
-        /* .active NOT :active psuedo-class.  When active, it means the current
-         * button is chosen 
-         */
-        &.active {
+        &.expanded {
             margin-left: 20px;
         }
     }
     .underline {
         width: 0;
-        background-color: $wrapper-bg-active;
+        background-color: $wrapper-bg-chosen;
         align-self: flex-start;
         transition: 300ms width ease-in-out;
-        &.active {
+        &.expanded {
             height: 4px;
             width: 100%;
         }
@@ -152,7 +149,7 @@ button.time-date {
     background-color: $ul-bg;
     max-height: 0;
 
-    &.active {
+    &.expanded {
         max-height: 2000px;
     }
 
