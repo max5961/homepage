@@ -19,7 +19,7 @@ $edit-bg: globals.$white;
     align-items: center;
     justify-content: flex-start;
 
-    &.edit-mode {
+    &.edit {
         background-color: $edit-bg;
         color: #0a0a0a;
     }
@@ -48,11 +48,17 @@ button.time-date-container {
         transition: 500ms opacity ease-in-out;
     }
 
-    &:hover .edit-tool-tip.visible {
+    &:hover .edit-tool-tip {
         opacity: 1;
+        &.hidden {
+            opacity: 1;
+        }
     }
-    &:active .edit-tool-tip.visible {
+    &:active .edit-tool-tip {
         opacity: 0.85;
+        &.hidden {
+            opacity: 1;
+        }
     }
 
     p.time {
