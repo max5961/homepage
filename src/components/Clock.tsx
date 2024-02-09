@@ -116,28 +116,68 @@ function clockReducer(state: ClockState, action: { type: string }): ClockState {
 
 interface ClockContext {
     clockState: ClockState;
-    dispatch: (action: { type: string }) => void;
-    setEditing: (bool: boolean) => void;
+    clockDispatch: (action: { type: string }) => void;
+    showingToolTip: boolean;
+    setShowingToolTip: (bool: boolean) => void;
 }
 const ClockContext = createContext<ClockContext | null>(null);
 
 export default function Clock(): React.ReactElement {
-    const [clockState, dispatch] = useReducer(clockReducer, {
+    const [clockState, clockDispatch] = useReducer(clockReducer, {
         date: new Date(),
         showAMPM: false,
         show12Hour: true,
         showSeconds: true,
         dateFormatIndex: 0,
     });
-    const [editing, setEditing] = useState<boolean>(true);
+
+    // init state to false for styling only
+    const [showingToolTip, setShowingToolTip] = useState<boolean>(false);
 
     // update the clock time/date every second
     useEffect(() => {
         const interval = setInterval(() => {
-            dispatch({ type: "update date" });
+            clockDispatch({ type: "update date" });
         }, 1000);
         return () => clearInterval(interval);
     }, []);
+
+    function getWrapperClassName(): string {
+        if (showingToolTip) {
+            return "time-date-component";
+        } else {
+            return "time-date-component edit-mode";
+        }
+    }
+
+    return (
+        <ClockContext.Provider
+            value={{
+                clockState,
+                clockDispatch,
+                showingToolTip,
+                setShowingToolTip,
+            }}
+        >
+            <div className={getWrapperClassName()}>
+                <TimeAndDate />
+                <DropDown showingToolTip={showingToolTip} />
+            </div>
+        </ClockContext.Provider>
+    );
+}
+
+function TimeAndDate(): React.ReactElement {
+    const clockContext = useContext(ClockContext);
+    if (!clockContext) {
+        throw new Error("Context not set");
+    }
+    const { clockState, showingToolTip, setShowingToolTip } = clockContext;
+
+    function getDate(dateFormatIndex: number): string {
+        const formatClock: FormatClock = new FormatClock(clockState.date);
+        return formatClock.getDate(dateFormatIndex);
+    }
 
     function getTime(): string {
         const formatClock: FormatClock = new FormatClock(clockState.date);
@@ -153,60 +193,106 @@ export default function Clock(): React.ReactElement {
         //         hh  :    mm            :?                             ss?       am/pm?
     }
 
-    function getDate(dateFormatIndex: number): string {
-        const formatClock: FormatClock = new FormatClock(clockState.date);
-        return formatClock.getDate(dateFormatIndex);
+    function getFormatClassName(): string {
+        return showingToolTip ? "edit-tool-tip visible" : "edit-tool-tip";
     }
 
-    const currEditClass: string = editing ? "editing" : "";
-
     return (
-        <ClockContext.Provider value={{ clockState, dispatch, setEditing }}>
-            <div className={`time-date-component ${currEditClass}`}>
-                <button className="time-date-container">
-                    <div
-                        className={`format-message-container ${currEditClass}`}
-                    >
-                        <img
-                            src={formatClockIcon}
-                            alt="gear-icon"
-                            className="gear-icon"
-                        />
-                        <span className="format-message">
-                            Format Date and Time
-                        </span>
-                    </div>
-                    <p className="time">{getTime()}</p>
-                    <p className="date">
-                        {getDate(clockState.dateFormatIndex)}
-                    </p>
-                </button>
-
-                <FormatDate />
-            </div>
-        </ClockContext.Provider>
+        <button
+            onClick={() => setShowingToolTip(false)}
+            className="time-date-container"
+        >
+            <p className={getFormatClassName()}>
+                <img
+                    src={formatClockIcon}
+                    alt="gear-icon"
+                    className="gear-icon"
+                />
+                <span className="format-message">Format Time and Date</span>
+            </p>
+            <p className="time">{getTime()}</p>
+            <p className="date">{getDate(clockState.dateFormatIndex)}</p>
+        </button>
     );
 }
 
-function ChooseWhichToFormat(): React.ReactElement {
+function DropDown({
+    showingToolTip,
+}: {
+    showingToolTip: boolean;
+}): React.ReactElement {
+    const [dateActive, setDateActive] = useState<boolean>(false);
+    const [timeActive, setTimeActive] = useState<boolean>(false);
+
+    function wrapperClassName(): string {
+        const fClass: string = "drop-down-wrapper";
+        return showingToolTip ? fClass : `${fClass} active`;
+    }
+    function dateClass(fClass: string): string {
+        return dateActive ? `${fClass} active` : fClass;
+    }
+    function timeClass(fClass: string): string {
+        return timeActive ? `${fClass} active` : fClass;
+    }
+
+    // only allow one tab open at a time
+    function handleClick(
+        state: boolean,
+        setState: (b: boolean) => void,
+        setOtherState: (b: boolean) => void,
+    ) {
+        if (state) {
+            setState(false);
+        } else {
+            setState(true);
+            setOtherState(false);
+        }
+    }
+
     return (
-        <div className="format-container prompt-container">
-            <h3>Edit Format</h3>
-            <button className="edit-date">Date</button>
-            <button className="edit-time">Time</button>
+        <div className={wrapperClassName()}>
+            <div className="divider"></div>
+            <div className="format-wrapper">
+                <button
+                    onClick={() =>
+                        handleClick(timeActive, setTimeActive, setDateActive)
+                    }
+                    className={timeClass("format-button")}
+                >
+                    Format Time
+                </button>
+                <div className={timeClass("underline")}></div>
+                <div className={timeClass("sub-drop-down-wrapper")}>
+                    <FormatTime />
+                </div>
+            </div>
+            <div className="format-wrapper">
+                <button
+                    onClick={() =>
+                        handleClick(dateActive, setDateActive, setTimeActive)
+                    }
+                    className={dateClass("format-button")}
+                >
+                    Format Date
+                </button>
+                <div className={dateClass("underline")}></div>
+                <div className={dateClass("sub-drop-down-wrapper")}>
+                    <FormatDate />
+                </div>
+            </div>
         </div>
     );
 }
+
 function FormatDate(): React.ReactElement {
     const context = useContext(ClockContext);
     if (!context) {
         throw new Error("Context not created");
     }
-    const { clockState, dispatch } = context;
-    const formatClock: FormatClock = new FormatClock(clockState.date);
+    const { clockState, clockDispatch, showingToolTip } = context;
 
     function handleClick(dateFormatIndex: number): void {
-        dispatch({ type: `date ${dateFormatIndex}` });
+        clockDispatch({ type: `date ${dateFormatIndex}` });
     }
 
     function getClass(num: number): string {
@@ -219,9 +305,8 @@ function FormatDate(): React.ReactElement {
 
     function getListItems(): React.ReactElement[] {
         const formatClock: FormatClock = new FormatClock(clockState.date);
-        const components: React.ReactElement[] = [];
+        const listItems: React.ReactElement[] = [];
         for (let i = 0; i < formatClock.options.length; i++) {
-            const [mouseOver, setMouseOver] = useState<boolean>(false);
             const component: React.ReactElement = (
                 <li key={i}>
                     <button
@@ -233,25 +318,27 @@ function FormatDate(): React.ReactElement {
                             <img src={checkmarkIcon} alt="checkmark" />
                         )}
                     </button>
-                    <div
-                        onMouseOver={() => setMouseOver(true)}
-                        className={`roll-border ${mouseOver && "visible"}`}
-                    ></div>
                 </li>
             );
-            components.push(component);
+            listItems.push(component);
         }
-        return components;
+        return listItems;
     }
 
-    return (
-        <div className="format-container date-container">
-            <div className="divider"></div>
-            <ul>{getListItems()}</ul>
-        </div>
-    );
+    if (showingToolTip) {
+        return <></>;
+    } else {
+        return <ul>{getListItems()}</ul>;
+    }
 }
+
 function FormatTime(): React.ReactElement {
+    const clockContext = useContext(ClockContext);
+    if (!clockContext) {
+        throw new Error("Context not found");
+    }
+    const { showingToolTip } = clockContext;
+
     interface ItemData {
         spanText: string;
         className: string;
@@ -275,8 +362,10 @@ function FormatTime(): React.ReactElement {
         },
     ];
 
-    return (
-        <div className="format-container time-container">
+    if (showingToolTip) {
+        return <></>;
+    } else {
+        return (
             <ul>
                 {items.map((item, index) => {
                     return (
@@ -287,9 +376,8 @@ function FormatTime(): React.ReactElement {
                     );
                 })}
             </ul>
-            <ApplyCancelButtons />
-        </div>
-    );
+        );
+    }
 }
 
 interface CheckBoxSliderProps {
@@ -300,13 +388,13 @@ function CheckBoxSlider({ action }: CheckBoxSliderProps): React.ReactElement {
     if (!clockContext) {
         throw new Error("ClockContext is null");
     }
-    const { dispatch } = clockContext;
+    const { clockDispatch } = clockContext;
     const [on, setOn] = useState<boolean>(false);
     const className = on ? "slider-switch on" : "slider-switch";
 
     function handleClick(): void {
         setOn(!on);
-        dispatch(action);
+        clockDispatch(action);
     }
 
     return (
