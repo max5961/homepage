@@ -246,7 +246,7 @@ function DropDown({ ddExpanded }: { ddExpanded: boolean }): React.ReactElement {
     const [dateExpanded, setDateExpanded] = useState<boolean>(false);
     const [timeExpanded, setTimeExpanded] = useState<boolean>(false);
 
-    // toggles an existing className to className.active
+    // toggles an existing className to className.expanded
     function toggleActive(expanded: boolean, fClass: string): string {
         return expanded ? `${fClass} expanded` : fClass;
     }
@@ -288,8 +288,15 @@ function DropDown({ ddExpanded }: { ddExpanded: boolean }): React.ReactElement {
                         Format Time
                     </button>
                     <div
-                        className={toggleActive(timeExpanded, "underline")}
-                    ></div>
+                        className={toggleActive(
+                            timeExpanded,
+                            "underline-wrapper",
+                        )}
+                    >
+                        <div
+                            className={toggleActive(timeExpanded, "underline")}
+                        ></div>
+                    </div>
                 </div>
                 <div className={toggleActive(timeExpanded, "ul-wrapper")}>
                     <FormatTime />
@@ -315,8 +322,15 @@ function DropDown({ ddExpanded }: { ddExpanded: boolean }): React.ReactElement {
                         Format Date
                     </button>
                     <div
-                        className={toggleActive(dateExpanded, "underline")}
-                    ></div>
+                        className={toggleActive(
+                            dateExpanded,
+                            "underline-wrapper",
+                        )}
+                    >
+                        <div
+                            className={toggleActive(dateExpanded, "underline")}
+                        ></div>
+                    </div>
                 </div>
                 <div className={toggleActive(dateExpanded, "ul-wrapper")}>
                     <FormatDate />
@@ -379,7 +393,7 @@ function FormatDate(): React.ReactElement {
         return listItems;
     }
 
-    return <ul>{getListItems()}</ul>;
+    return <ul className="choose-date-format">{getListItems()}</ul>;
 }
 
 function FormatTime(): React.ReactElement {
@@ -464,14 +478,12 @@ function FormatTime(): React.ReactElement {
 }
 
 interface CheckBoxSliderProps {
-    // action: { type: string };
     handleDispatch: () => void;
-    clockState: boolean; // reference to what format the clock is showing time in
+    clockState: boolean;
 }
 function CheckBoxSlider({
     handleDispatch,
     clockState,
-    // action,
 }: CheckBoxSliderProps): React.ReactElement {
     const clockContext = useContext(ClockContext);
     if (!clockContext) {
@@ -488,14 +500,16 @@ function CheckBoxSlider({
         handleDispatch();
     }
 
-    function getClassName(): string {
-        const fClass = "slider-switch";
+    function toggleClass(fClass: string): string {
         return on ? `${fClass} on` : fClass;
     }
 
     return (
-        <button onClick={handleClick} className="checkbox-slider">
-            <div className={getClassName()}>
+        <button
+            onClick={handleClick}
+            className={toggleClass("checkbox-slider")}
+        >
+            <div className={toggleClass("slider-switch")}>
                 <img src={checkmarkIcon} alt="checkmark" />
             </div>
         </button>
