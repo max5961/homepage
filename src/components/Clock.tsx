@@ -10,13 +10,15 @@ import { format } from "date-fns";
 import formatClockIcon from "../images/icons/format-clock.svg";
 import checkmarkIcon from "../images/icons/check.svg";
 
+/* Takes in a new Date object and returns formatted dates with the help of the
+ * date-fns library */
 class FormatClock {
     date: Date;
-    options: string[];
+    formatPatterns: string[];
 
     constructor(date: Date) {
         this.date = date;
-        this.options = [
+        this.formatPatterns = [
             "EEEE, MMMM do yyyy",
             "EEEE, MMMM d yyyy",
             "MMMM do yyyy",
@@ -48,20 +50,39 @@ class FormatClock {
         return format(this.date, "aa");
     }
 
-    getDate(optionsIndex: number): string {
-        if (!this.options[optionsIndex]) {
+    getDate(dateFormatIndex: number): string {
+        // dateFormatIndex is part of the ClockState object
+        if (!this.formatPatterns[dateFormatIndex]) {
             throw new Error("Invalid options index");
         }
 
-        return format(this.date, this.options[optionsIndex]);
+        return format(this.date, this.formatPatterns[dateFormatIndex]);
     }
 }
+
 interface ClockState {
     date: Date;
     showAMPM: boolean;
     show24Hour: boolean;
     showSeconds: boolean;
     dateFormatIndex: number;
+}
+enum ActionType {
+    UpdateDate = "UPDATE_DATE",
+    ToggleAMPM = "TOGGLE_AM_PM",
+    OffAMPM = "OFF_AM_PM",
+    Toggle24Hour = "TOGGLE_24_HOUR",
+    Off24Hour = "OFF_24_HOUR",
+    ToggleSeconds = "TOGGLE_SECONDS",
+    OffSeconds = "OFF_SECONDS",
+    DateFormat0 = "DATE_0",
+    DateFormat1 = "DATE_1",
+    DateFormat2 = "DATE_2",
+    DateFormat3 = "DATE_3",
+    DateFormat4 = "DATE_4",
+    DateFormat5 = "DATE_5",
+    DateFormat6 = "DATE_6",
+    DateFormat7 = "DATE_7",
 }
 function clockReducer(state: ClockState, action: { type: string }): ClockState {
     const copy: ClockState = {
@@ -72,49 +93,49 @@ function clockReducer(state: ClockState, action: { type: string }): ClockState {
         dateFormatIndex: state.dateFormatIndex,
     };
     switch (action.type) {
-        case "update date":
+        case ActionType.UpdateDate:
             copy.date = new Date();
             break;
-        case "toggle AM/PM":
+        case ActionType.ToggleAMPM:
             copy.showAMPM = !copy.showAMPM;
             break;
-        case "off AM/PM":
+        case ActionType.OffAMPM:
             copy.showAMPM = false;
             break;
-        case "toggle 24 hour":
+        case ActionType.Toggle24Hour:
             copy.show24Hour = !copy.show24Hour;
             break;
-        case "off 24 hour":
+        case ActionType.Off24Hour:
             copy.show24Hour = false;
             break;
-        case "toggle seconds":
+        case ActionType.ToggleSeconds:
             copy.showSeconds = !copy.showSeconds;
             break;
-        case "off seconds":
+        case ActionType.OffSeconds:
             copy.showSeconds = false;
             break;
-        case "date 0":
+        case ActionType.DateFormat0:
             copy.dateFormatIndex = 0;
             break;
-        case "date 1":
+        case ActionType.DateFormat1:
             copy.dateFormatIndex = 1;
             break;
-        case "date 2":
+        case ActionType.DateFormat2:
             copy.dateFormatIndex = 2;
             break;
-        case "date 3":
+        case ActionType.DateFormat3:
             copy.dateFormatIndex = 3;
             break;
-        case "date 4":
+        case ActionType.DateFormat4:
             copy.dateFormatIndex = 4;
             break;
-        case "date 5":
+        case ActionType.DateFormat5:
             copy.dateFormatIndex = 5;
             break;
-        case "date 6":
+        case ActionType.DateFormat6:
             copy.dateFormatIndex = 6;
             break;
-        case "date 7":
+        case ActionType.DateFormat7:
             copy.dateFormatIndex = 7;
             break;
         default:
@@ -131,6 +152,7 @@ interface ClockContext {
 }
 const ClockContext = createContext<ClockContext | null>(null);
 
+// Top Level Component
 export default function Clock(): React.ReactElement {
     const [clockState, clockDispatch] = useReducer(clockReducer, {
         date: new Date(),
@@ -146,7 +168,7 @@ export default function Clock(): React.ReactElement {
     // update the clock time/date every second
     useEffect(() => {
         const interval = setInterval(() => {
-            clockDispatch({ type: "update date" });
+            clockDispatch({ type: ActionType.UpdateDate });
         }, 1000);
         return () => clearInterval(interval);
     }, []);
@@ -312,7 +334,17 @@ function FormatDate(): React.ReactElement {
     const { clockState, clockDispatch, showingToolTip } = context;
 
     function handleClick(dateFormatIndex: number): void {
-        clockDispatch({ type: `date ${dateFormatIndex}` });
+        const actionTypes: ActionType[] = [
+            ActionType.DateFormat0,
+            ActionType.DateFormat1,
+            ActionType.DateFormat2,
+            ActionType.DateFormat3,
+            ActionType.DateFormat4,
+            ActionType.DateFormat5,
+            ActionType.DateFormat6,
+            ActionType.DateFormat7,
+        ];
+        clockDispatch({ type: `${actionTypes[dateFormatIndex]}` });
     }
 
     function getClass(num: number): string {
@@ -326,7 +358,7 @@ function FormatDate(): React.ReactElement {
     function getListItems(): React.ReactElement[] {
         const formatClock: FormatClock = new FormatClock(clockState.date);
         const listItems: React.ReactElement[] = [];
-        for (let i = 0; i < formatClock.options.length; i++) {
+        for (let i = 0; i < formatClock.formatPatterns.length; i++) {
             const component: React.ReactElement = (
                 <li key={i}>
                     <button
@@ -363,25 +395,25 @@ function FormatTime(): React.ReactElement {
         if (className === "option show-suffix") {
             if (!clockState.showAMPM) {
                 // 24 hour time does not use AM/PM
-                clockDispatch({ type: "toggle AM/PM" });
-                clockDispatch({ type: "off 24 hour" });
+                clockDispatch({ type: ActionType.ToggleAMPM });
+                clockDispatch({ type: ActionType.Off24Hour });
             } else {
-                clockDispatch({ type: "toggle AM/PM" });
+                clockDispatch({ type: ActionType.ToggleAMPM });
             }
             return;
         }
         if (className === "option show-24-hour") {
             if (!clockState.show24Hour) {
                 // 24 hour time does not use AM/PM
-                clockDispatch({ type: "toggle 24 hour" });
-                clockDispatch({ type: "off AM/PM" });
+                clockDispatch({ type: ActionType.Toggle24Hour });
+                clockDispatch({ type: ActionType.OffAMPM });
             } else {
-                clockDispatch({ type: "toggle 24 hour" });
+                clockDispatch({ type: ActionType.Toggle24Hour });
             }
             return;
         }
         if (className === "option show-seconds") {
-            clockDispatch({ type: "toggle seconds" });
+            clockDispatch({ type: ActionType.ToggleSeconds });
             return;
         }
     }
