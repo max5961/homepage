@@ -33,7 +33,7 @@ class FormatClock {
     }
 
     getHour0_23(): string {
-        return format(this.date, "H");
+        return format(this.date, "HH");
     }
 
     getMinutes(): string {
@@ -59,7 +59,7 @@ class FormatClock {
 interface ClockState {
     date: Date;
     showAMPM: boolean;
-    show12Hour: boolean;
+    show24Hour: boolean;
     showSeconds: boolean;
     dateFormatIndex: number;
 }
@@ -67,7 +67,7 @@ function clockReducer(state: ClockState, action: { type: string }): ClockState {
     const copy: ClockState = {
         date: state.date,
         showAMPM: state.showAMPM,
-        show12Hour: state.show12Hour,
+        show24Hour: state.show24Hour,
         showSeconds: state.showSeconds,
         dateFormatIndex: state.dateFormatIndex,
     };
@@ -78,11 +78,20 @@ function clockReducer(state: ClockState, action: { type: string }): ClockState {
         case "toggle AM/PM":
             copy.showAMPM = !copy.showAMPM;
             break;
-        case "toggle 12 hour":
-            copy.show12Hour = !copy.show12Hour;
+        case "off AM/PM":
+            copy.showAMPM = false;
+            break;
+        case "toggle 24 hour":
+            copy.show24Hour = !copy.show24Hour;
+            break;
+        case "off 24 hour":
+            copy.show24Hour = false;
             break;
         case "toggle seconds":
             copy.showSeconds = !copy.showSeconds;
+            break;
+        case "off seconds":
+            copy.showSeconds = false;
             break;
         case "date 0":
             copy.dateFormatIndex = 0;
@@ -126,7 +135,7 @@ export default function Clock(): React.ReactElement {
     const [clockState, clockDispatch] = useReducer(clockReducer, {
         date: new Date(),
         showAMPM: false,
-        show12Hour: true,
+        show24Hour: true,
         showSeconds: true,
         dateFormatIndex: 0,
     });
@@ -182,9 +191,9 @@ function TimeAndDate(): React.ReactElement {
     function getTime(): string {
         const formatClock: FormatClock = new FormatClock(clockState.date);
 
-        const hour = clockState.show12Hour
-            ? formatClock.getHour1_12()
-            : formatClock.getHour0_23();
+        const hour = clockState.show24Hour
+            ? formatClock.getHour0_23()
+            : formatClock.getHour1_12();
         const minute = formatClock.getMinutes();
         const second = clockState.showSeconds ? formatClock.getSeconds() : "";
         const ampm = clockState.showAMPM ? formatClock.getAMPM() : "";
@@ -251,31 +260,42 @@ function DropDown({
 
     return (
         <div className={wrapperClassName()}>
-            <div className="divider"></div>
             <div className="format-wrapper">
-                <button
-                    onClick={() =>
-                        handleClick(timeActive, setTimeActive, setDateActive)
-                    }
-                    className={timeClass("format-button")}
-                >
-                    Format Time
-                </button>
-                <div className={timeClass("underline")}></div>
+                <div className={timeClass("format-button-wrapper")}>
+                    <button
+                        onClick={() =>
+                            handleClick(
+                                timeActive,
+                                setTimeActive,
+                                setDateActive,
+                            )
+                        }
+                        className={timeClass("format-button")}
+                    >
+                        Format Time
+                    </button>
+                    <div className={timeClass("underline")}></div>
+                </div>
                 <div className={timeClass("sub-drop-down-wrapper")}>
                     <FormatTime />
                 </div>
             </div>
             <div className="format-wrapper">
-                <button
-                    onClick={() =>
-                        handleClick(dateActive, setDateActive, setTimeActive)
-                    }
-                    className={dateClass("format-button")}
-                >
-                    Format Date
-                </button>
-                <div className={dateClass("underline")}></div>
+                <div className={dateClass("format-button-wrapper")}>
+                    <button
+                        onClick={() =>
+                            handleClick(
+                                dateActive,
+                                setDateActive,
+                                setTimeActive,
+                            )
+                        }
+                        className={dateClass("format-button")}
+                    >
+                        Format Date
+                    </button>
+                    <div className={dateClass("underline")}></div>
+                </div>
                 <div className={dateClass("sub-drop-down-wrapper")}>
                     <FormatDate />
                 </div>
@@ -337,28 +357,63 @@ function FormatTime(): React.ReactElement {
     if (!clockContext) {
         throw new Error("Context not found");
     }
-    const { showingToolTip } = clockContext;
+    const { showingToolTip, clockState, clockDispatch } = clockContext;
+
+    function handleDispatch(className: string) {
+        if (className === "option show-suffix") {
+            if (!clockState.showAMPM) {
+                // 24 hour time does not use AM/PM
+                clockDispatch({ type: "toggle AM/PM" });
+                clockDispatch({ type: "off 24 hour" });
+            } else {
+                clockDispatch({ type: "toggle AM/PM" });
+            }
+            return;
+        }
+        if (className === "option show-24-hour") {
+            if (!clockState.show24Hour) {
+                // 24 hour time does not use AM/PM
+                clockDispatch({ type: "toggle 24 hour" });
+                clockDispatch({ type: "off AM/PM" });
+            } else {
+                clockDispatch({ type: "toggle 24 hour" });
+            }
+            return;
+        }
+        if (className === "option show-seconds") {
+            clockDispatch({ type: "toggle seconds" });
+            return;
+        }
+    }
 
     interface ItemData {
         spanText: string;
         className: string;
-        action: { type: string };
+        // action: { type: string };
+        handleDispatch: () => void;
+        clockState: boolean;
     }
     const items: ItemData[] = [
         {
             spanText: "Show AM/PM",
             className: "option show-suffix",
-            action: { type: "toggle AM/PM" },
+            // action: { type: "toggle AM/PM" },
+            handleDispatch: () => handleDispatch("option show-suffix"),
+            clockState: clockState.showAMPM,
         },
         {
             spanText: "24 hour time",
             className: "option show-24-hour",
-            action: { type: "toggle 12 hour" },
+            // action: { type: "toggle 24 hour" },
+            handleDispatch: () => handleDispatch("option show-24-hour"),
+            clockState: clockState.show24Hour,
         },
         {
             spanText: "Show seconds",
-            className: "option show-24-hour",
-            action: { type: "toggle seconds" },
+            className: "option show-seconds",
+            // action: { type: "toggle seconds" },
+            handleDispatch: () => handleDispatch("option show-seconds"),
+            clockState: clockState.showSeconds,
         },
     ];
 
@@ -366,13 +421,16 @@ function FormatTime(): React.ReactElement {
         return <></>;
     } else {
         return (
-            <ul>
+            <ul className="choose-time-format">
                 {items.map((item, index) => {
                     return (
-                        <div key={index} className={item.className}>
+                        <li key={index} className={item.className}>
                             <span>{item.spanText}</span>
-                            <CheckBoxSlider action={item.action} />
-                        </div>
+                            <CheckBoxSlider
+                                clockState={item.clockState}
+                                handleDispatch={item.handleDispatch}
+                            />
+                        </li>
                     );
                 })}
             </ul>
@@ -381,36 +439,40 @@ function FormatTime(): React.ReactElement {
 }
 
 interface CheckBoxSliderProps {
-    action: { type: string };
+    // action: { type: string };
+    handleDispatch: () => void;
+    clockState: boolean; // reference to what format the clock is showing time in
 }
-function CheckBoxSlider({ action }: CheckBoxSliderProps): React.ReactElement {
+function CheckBoxSlider({
+    handleDispatch,
+    clockState,
+    // action,
+}: CheckBoxSliderProps): React.ReactElement {
     const clockContext = useContext(ClockContext);
     if (!clockContext) {
         throw new Error("ClockContext is null");
     }
-    const { clockDispatch } = clockContext;
-    const [on, setOn] = useState<boolean>(false);
-    const className = on ? "slider-switch on" : "slider-switch";
+
+    const [on, setOn] = useState<boolean>(clockState);
+    useEffect(() => {
+        setOn(clockState);
+    }, [setOn, clockState]);
 
     function handleClick(): void {
         setOn(!on);
-        clockDispatch(action);
+        handleDispatch();
+    }
+
+    function getClassName(): string {
+        const fClass = "slider-switch";
+        return on ? `${fClass} on` : fClass;
     }
 
     return (
         <button onClick={handleClick} className="checkbox-slider">
-            <div className={className}>
+            <div className={getClassName()}>
                 <img src={checkmarkIcon} alt="checkmark" />
             </div>
         </button>
-    );
-}
-
-function ApplyCancelButtons(): React.ReactElement {
-    return (
-        <div className="apply-cancel-container">
-            <button className="cancel">Cancel</button>
-            <button className="apply">Apply</button>
-        </div>
     );
 }

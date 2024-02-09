@@ -65,6 +65,9 @@ button.time-date-container {
 }
 
 .drop-down-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     max-height: 0;
     user-select: none;
     overflow: hidden;
@@ -74,51 +77,64 @@ button.time-date-container {
         height: auto;
         max-height: 2000px;
     }
+
     button {
         width: 100%;
         height: 50px;
-
-        &:hover {
-            background-color: #00000020;
-        }
     }
+
     .format-wrapper {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background-color: #006300;
+        width: 100%;
         height: 50px;
         height: auto;
         overflow: hidden;
         position: relative;
 
+        .format-button-wrapper {
+            width: 100%;
+            background-color: darken(#00fff8, 10%);
+            transition: 300ms background-color ease-in-out;
+            &.active {
+                background-color: #00fff8;
+            }
+        }
         button.format-button {
-            background-color: globals.$white;
-            transition: 300ms all ease-in-out;
+            background-color: #42899e;
+            transition: 100ms all ease-in-out;
             &:hover {
-                margin-left: 10px;
+                margin-left: 5px;
+
+                & + .underline {
+                    height: 4px;
+                    width: 100%;
+                    background-color: #00fff8;
+                }
             }
             &.active {
-                margin-left: 30px;
+                margin-left: 20px;
             }
         }
     }
     .underline {
         width: 0;
-        background-color: red;
-        // align-self: flex-start;
-        transition: 500ms width ease-in-out;
+        background-color: #00fff8;
+        align-self: flex-start;
+        transition: 300ms width ease-in-out;
         &.active {
-            height: 3px;
+            height: 4px;
             width: 100%;
         }
     }
     .sub-drop-down-wrapper {
         height: auto;
         width: 100%;
+        color: globals.$white;
+        background-color: #7996c3;
         max-height: 0;
-        background-color: green;
 
         &.active {
             max-height: 2000px;
@@ -126,6 +142,70 @@ button.time-date-container {
 
         ul {
             width: 100%;
+            display: flex;
+            flex-direction: column;
+
+            button {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0 10px 0 30px;
+                &:hover {
+                    background-color: #00000020;
+                }
+                &:active {
+                    background-color: #00000025;
+                }
+            }
+        }
+
+        ul.choose-time-format {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+
+            li {
+                margin-left: 30px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                button.checkbox-slider {
+                    width: 70px;
+                    height: 40px;
+                    background-color: pink;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: flex-start;
+                    border-radius: 40px;
+                    padding: 5px;
+
+                    .slider-switch {
+                        height: 30px;
+                        width: 30px;
+                        border-radius: 50%;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        background-color: green;
+                        transition: 100ms transform ease-in-out;
+                        img {
+                            opacity: 0;
+                            transition: 100ms opacity ease-in-out;
+                        }
+
+                        &.on {
+                            img {
+                                opacity: 1;
+                            }
+                            transform: translateX(100%);
+                        }
+                    }
+                }
+            }
         }
     }
 }
