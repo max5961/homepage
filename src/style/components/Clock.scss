@@ -10,6 +10,8 @@ $main-font: "Inter", sans-serif;
 $date-font: "Inter", sans-serif;
 $time-font: "Protest Strike", sans-serif;
 $edit-bg: globals.$white;
+$edit-font-color: #0a0a0a;
+$ul-bg: #00000012;
 
 /* The #clock element has two main containers: 1. A live view of the real
  * time and date.  2. A hidden drop down that is revelaed when the time and date
@@ -27,7 +29,7 @@ $edit-bg: globals.$white;
     // change background color when editing clock
     &.edit-clock {
         background-color: $edit-bg;
-        color: #0a0a0a;
+        color: $edit-font-color;
     }
 
     & img {
@@ -47,7 +49,7 @@ button.time-date {
 
     .edit-tool-tip {
         opacity: 0;
-        color: #ffffff;
+        color: globals.$white;
         transition: 500ms opacity ease-in-out;
     }
 
@@ -104,7 +106,6 @@ button.time-date {
     $wrapper-bg-expanded: #2a56a7;
     $wrapper-bg: lighten($wrapper-bg-expanded, 20%);
     $button-bg: globals.$white;
-
     width: 100%;
     background-color: $wrapper-bg;
     transition: 300ms background-color ease-in-out;
@@ -113,9 +114,11 @@ button.time-date {
     }
 
     button.format-button {
-        height: 50px;
+        height: 60px;
         width: 100%;
         background-color: $button-bg;
+        font-weight: 600;
+        font-size: 1.1rem;
         transition: 100ms all ease-in-out;
         &:hover {
             margin-left: 5px;
@@ -145,11 +148,8 @@ button.time-date {
 }
 
 .ul-wrapper {
-    $ul-bg: #00000012;
-
     height: auto;
     width: 100%;
-    color: black;
     background-color: $ul-bg;
     max-height: 0;
 
@@ -167,6 +167,8 @@ button.time-date {
         li {
             height: 100%;
             width: 100%;
+            font-size: 15px;
+            font-weight: 600;
         }
     }
 }
@@ -174,6 +176,8 @@ button.time-date {
 ul.choose-date-format button {
     height: 100%;
     width: 100%;
+    font-size: 15px;
+    font-weight: 600;
     display: flex;
     flex-direction: row;
     align-items: center;
