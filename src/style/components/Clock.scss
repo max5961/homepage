@@ -56,7 +56,7 @@ button.time-date {
     .edit-tool-tip {
         opacity: 0;
         color: globals.$white;
-        transition: 500ms opacity ease-in-out;
+        transition: 200ms opacity ease-in-out;
     }
 
     // edit-tool-tip is toggled to visible only when NOT in edit-mode
@@ -126,6 +126,11 @@ button.time-date {
         font-weight: 600;
         font-size: 1.1rem;
         transition: 100ms all ease-in-out;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 50px 0 30px;
+
         &:hover {
             margin-left: 5px;
         }

@@ -10,6 +10,7 @@ import {
 import { format } from "date-fns";
 import formatClockIcon from "../images/icons/format-clock.svg";
 import checkmarkIcon from "../images/icons/check.svg";
+import caretIcon from "../images/icons/down-caret.svg";
 
 /* Takes in a new Date object and returns formatted dates with the help of the
  * date-fns library */
@@ -406,6 +407,9 @@ function DropDown(): React.ReactElement {
         }
     }
 
+    /* While I could toggle only the corresponding sub-drop-down-container, it
+     * would be less intuitive to edit in scss that way than to just toggle them
+     * all */
     return (
         <div
             className={toggleActive(
@@ -413,7 +417,12 @@ function DropDown(): React.ReactElement {
                 "drop-down-container",
             )}
         >
-            <div className="sub-drop-down-container">
+            <div
+                className={toggleActive(
+                    ddState.timeExpanded,
+                    "sub-drop-down-container",
+                )}
+            >
                 <div
                     className={toggleActive(
                         ddState.timeExpanded,
@@ -449,7 +458,12 @@ function DropDown(): React.ReactElement {
                     <FormatTime />
                 </div>
             </div>
-            <div className="sub-drop-down-container">
+            <div
+                className={toggleActive(
+                    ddState.dateExpanded,
+                    "sub-drop-down-container",
+                )}
+            >
                 <div
                     className={toggleActive(
                         ddState.dateExpanded,
