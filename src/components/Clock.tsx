@@ -348,7 +348,7 @@ function TimeAndDate(): React.ReactElement {
 
     // if not actively editing the clock do not show the tool tip on hover
     function getFormatClassName(): string {
-        return edit ? "edit-tool-tip visible" : "edit-tool-tip";
+        return edit ? "edit-tool-tip" : "edit-tool-tip visible";
     }
 
     function handleClick(): void {
