@@ -5,6 +5,7 @@ import {
     useReducer,
     useContext,
     createContext,
+    useRef,
 } from "react";
 import { format } from "date-fns";
 import formatClockIcon from "../images/icons/format-clock.svg";
@@ -67,7 +68,7 @@ interface ClockState {
     showSeconds: boolean;
     dateFormatIndex: number;
 }
-enum ActionType {
+enum ClockAction {
     UpdateDate = "UPDATE_DATE",
     ToggleAMPM = "TOGGLE_AM_PM",
     OffAMPM = "OFF_AM_PM",
@@ -93,50 +94,115 @@ function clockReducer(state: ClockState, action: { type: string }): ClockState {
         dateFormatIndex: state.dateFormatIndex,
     };
     switch (action.type) {
-        case ActionType.UpdateDate:
+        case ClockAction.UpdateDate:
             copy.date = new Date();
             break;
-        case ActionType.ToggleAMPM:
+        case ClockAction.ToggleAMPM:
             copy.showAMPM = !copy.showAMPM;
             break;
-        case ActionType.OffAMPM:
+        case ClockAction.OffAMPM:
             copy.showAMPM = false;
             break;
-        case ActionType.Toggle24Hour:
+        case ClockAction.Toggle24Hour:
             copy.show24Hour = !copy.show24Hour;
             break;
-        case ActionType.Off24Hour:
+        case ClockAction.Off24Hour:
             copy.show24Hour = false;
             break;
-        case ActionType.ToggleSeconds:
+        case ClockAction.ToggleSeconds:
             copy.showSeconds = !copy.showSeconds;
             break;
-        case ActionType.OffSeconds:
+        case ClockAction.OffSeconds:
             copy.showSeconds = false;
             break;
-        case ActionType.DateFormat0:
+        case ClockAction.DateFormat0:
             copy.dateFormatIndex = 0;
             break;
-        case ActionType.DateFormat1:
+        case ClockAction.DateFormat1:
             copy.dateFormatIndex = 1;
             break;
-        case ActionType.DateFormat2:
+        case ClockAction.DateFormat2:
             copy.dateFormatIndex = 2;
             break;
-        case ActionType.DateFormat3:
+        case ClockAction.DateFormat3:
             copy.dateFormatIndex = 3;
             break;
-        case ActionType.DateFormat4:
+        case ClockAction.DateFormat4:
             copy.dateFormatIndex = 4;
             break;
-        case ActionType.DateFormat5:
+        case ClockAction.DateFormat5:
             copy.dateFormatIndex = 5;
             break;
-        case ActionType.DateFormat6:
+        case ClockAction.DateFormat6:
             copy.dateFormatIndex = 6;
             break;
-        case ActionType.DateFormat7:
+        case ClockAction.DateFormat7:
             copy.dateFormatIndex = 7;
+            break;
+        default:
+            throw new Error("Unhandled action type");
+    }
+    return copy;
+}
+
+interface DropDownState {
+    dropDownExpanded: boolean;
+    timeExpanded: boolean;
+    dateExpanded: boolean;
+}
+enum DDAction {
+    CloseAll = "CLOSE_ALL",
+    ToggleDD = "TOGGLE_DROP_DOWN",
+    ToggleTime = "TOGGLE_TIME_DD",
+    ToggleDate = "TOGGLE_DATE_DD",
+    CloseDD = "CLOSE_DROP_DOWN",
+    CloseTime = "CLOSE_TIME_DD",
+    CloseDate = "CLOSE_DATE_DD",
+    OpenDD = "OPEN_DROP_DOWN",
+    OpenTime = "OPEN_TIME",
+    OpenDate = "OPEN_DATE",
+}
+function dropDownReducer(
+    ddState: DropDownState,
+    action: { type: string },
+): DropDownState {
+    const copy: DropDownState = {
+        dropDownExpanded: ddState.dropDownExpanded,
+        timeExpanded: ddState.timeExpanded,
+        dateExpanded: ddState.dateExpanded,
+    };
+    switch (action.type) {
+        case DDAction.CloseAll:
+            copy.dropDownExpanded = false;
+            copy.timeExpanded = false;
+            copy.dateExpanded = false;
+            break;
+        case DDAction.ToggleDD:
+            copy.dropDownExpanded = !ddState.dropDownExpanded;
+            break;
+        case DDAction.ToggleTime:
+            copy.timeExpanded = !ddState.timeExpanded;
+            break;
+        case DDAction.ToggleDate:
+            copy.dateExpanded = !ddState.dateExpanded;
+            break;
+        case DDAction.CloseDD:
+            copy.dropDownExpanded = false;
+            break;
+        case DDAction.CloseTime:
+            copy.timeExpanded = false;
+            break;
+        case DDAction.CloseDate:
+            copy.dateExpanded = false;
+            break;
+        case DDAction.OpenDD:
+            copy.dropDownExpanded = true;
+            break;
+        case DDAction.OpenTime:
+            copy.timeExpanded = true;
+            break;
+        case DDAction.OpenDate:
+            copy.dateExpanded = true;
             break;
         default:
             throw new Error("Unhandled action type");
@@ -147,8 +213,10 @@ function clockReducer(state: ClockState, action: { type: string }): ClockState {
 interface ClockContext {
     clockState: ClockState;
     clockDispatch: (action: { type: string }) => void;
-    ddExpanded: boolean;
-    setDdExpanded: (bool: boolean) => void;
+    ddState: DropDownState;
+    ddDispatch: (action: { type: string }) => void;
+    edit: boolean;
+    setEdit: (b: boolean) => void;
 }
 const ClockContext = createContext<ClockContext | null>(null);
 
@@ -161,37 +229,94 @@ export default function Clock(): React.ReactElement {
         showSeconds: true,
         dateFormatIndex: 0,
     });
+    const [ddState, ddDispatch] = useReducer(dropDownReducer, {
+        dropDownExpanded: false,
+        timeExpanded: false,
+        dateExpanded: false,
+    });
 
-    /* drop down is toggled when the user clicks the TimeAndDate component which
-     * is styled as a button */
-    const [ddExpanded, setDdExpanded] = useState<boolean>(false);
+    /* edit mode is entered when the TimeAndDate component is clicked.  The 
+    /* TimeAndDate component is wrapped in a button */
+    const [edit, setEdit] = useState<boolean>(false);
 
     // update the clock time/date every second
     useEffect(() => {
         const interval = setInterval(() => {
-            clockDispatch({ type: ActionType.UpdateDate });
+            clockDispatch({ type: ClockAction.UpdateDate });
         }, 1000);
         return () => clearInterval(interval);
     }, []);
-
-    function toggleClass(): string {
-        return ddExpanded ? "edit-clock" : "";
-    }
 
     return (
         <ClockContext.Provider
             value={{
                 clockState,
                 clockDispatch,
-                ddExpanded,
-                setDdExpanded,
+                ddState,
+                ddDispatch,
+                edit,
+                setEdit,
             }}
         >
-            <div id="clock" className={toggleClass()}>
-                <TimeAndDate />
-                <DropDown ddExpanded={ddExpanded} />
-            </div>
+            <>{edit ? <EditClockWrapper /> : <ClockWrapper />}</>
         </ClockContext.Provider>
+    );
+}
+
+function ClockWrapper(): React.ReactElement {
+    return (
+        <div id="clock">
+            <TimeAndDate />
+        </div>
+    );
+}
+
+function EditClockWrapper(): React.ReactElement {
+    const clockContext = useContext(ClockContext);
+    if (!clockContext) {
+        throw new Error("Context not set");
+    }
+
+    const { setEdit, ddDispatch } = clockContext;
+    const wrapper = useRef<HTMLDivElement | null>(null);
+
+    // exit edit and fade out with click outside of component
+    useEffect(() => {
+        function handleOutsideClick(e: any): void {
+            const transitionTime: number = 300; // #clock.edit-clock
+
+            if (wrapper.current && !wrapper.current.contains(e.target)) {
+                wrapper.current.classList.add("exiting");
+                setTimeout(() => {
+                    setEdit(false);
+                    ddDispatch({ type: DDAction.CloseAll });
+                }, transitionTime);
+            }
+        }
+
+        document.addEventListener("mousedown", handleOutsideClick);
+
+        return () =>
+            document.removeEventListener("mousedown", handleOutsideClick);
+    }, [setEdit, ddDispatch]);
+
+    // fade in
+    useEffect(() => {
+        if (wrapper.current) {
+            wrapper.current.classList.add("entering");
+            setTimeout(() => {
+                if (wrapper.current) {
+                    wrapper.current.classList.remove("entering");
+                }
+            }, 0);
+        }
+    }, []);
+
+    return (
+        <div id="clock" className="edit-clock" ref={wrapper}>
+            <TimeAndDate />
+            <DropDown />
+        </div>
     );
 }
 
@@ -200,7 +325,7 @@ function TimeAndDate(): React.ReactElement {
     if (!clockContext) {
         throw new Error("Context not set");
     }
-    const { clockState, ddExpanded, setDdExpanded } = clockContext;
+    const { clockState, ddState, ddDispatch, edit, setEdit } = clockContext;
 
     function getDate(): string {
         const formatClock: FormatClock = new FormatClock(clockState.date);
@@ -223,11 +348,20 @@ function TimeAndDate(): React.ReactElement {
 
     // if not actively editing the clock do not show the tool tip on hover
     function getFormatClassName(): string {
-        return ddExpanded ? "edit-tool-tip" : "edit-tool-tip visible";
+        return edit ? "edit-tool-tip visible" : "edit-tool-tip";
+    }
+
+    function handleClick(): void {
+        if (!ddState.dropDownExpanded) {
+            ddDispatch({ type: DDAction.OpenDD });
+        }
+        if (!edit) {
+            setEdit(true);
+        }
     }
 
     return (
-        <button onClick={() => setDdExpanded(true)} className="time-date">
+        <button onClick={handleClick} className="time-date">
             <p className={getFormatClassName()}>
                 <img
                     src={formatClockIcon}
@@ -242,97 +376,112 @@ function TimeAndDate(): React.ReactElement {
     );
 }
 
-function DropDown({ ddExpanded }: { ddExpanded: boolean }): React.ReactElement {
-    const [dateExpanded, setDateExpanded] = useState<boolean>(false);
-    const [timeExpanded, setTimeExpanded] = useState<boolean>(false);
+function DropDown(): React.ReactElement {
+    const context = useContext(ClockContext);
+    if (!context) {
+        throw new Error("Clock context in null");
+    }
+    const { ddState, ddDispatch } = context;
 
     // toggles an existing className to className.expanded
     function toggleActive(expanded: boolean, fClass: string): string {
         return expanded ? `${fClass} expanded` : fClass;
     }
 
-    // only allow one tab open at a time
-    function handleClick(
-        state: boolean,
-        setState: (b: boolean) => void,
-        setOtherState: (b: boolean) => void,
-    ) {
-        if (state) {
-            setState(false);
+    function handleTimeClick(): void {
+        if (ddState.dateExpanded) {
+            ddDispatch({ type: DDAction.CloseDate });
+            ddDispatch({ type: DDAction.OpenTime });
         } else {
-            setState(true);
-            setOtherState(false);
+            ddDispatch({ type: DDAction.ToggleTime });
+        }
+    }
+
+    function handleDateClick(): void {
+        if (ddState.timeExpanded) {
+            ddDispatch({ type: DDAction.CloseTime });
+            ddDispatch({ type: DDAction.OpenDate });
+        } else {
+            ddDispatch({ type: DDAction.ToggleDate });
         }
     }
 
     return (
-        <div className={toggleActive(ddExpanded, "drop-down-container")}>
+        <div
+            className={toggleActive(
+                ddState.dropDownExpanded,
+                "drop-down-container",
+            )}
+        >
             <div className="sub-drop-down-container">
-                {/* format-button-wrapper */}
                 <div
                     className={toggleActive(
-                        timeExpanded,
+                        ddState.timeExpanded,
                         "format-button-wrapper",
                     )}
                 >
                     <button
-                        onClick={() =>
-                            handleClick(
-                                timeExpanded,
-                                setTimeExpanded,
-                                setDateExpanded,
-                            )
-                        }
-                        className={toggleActive(timeExpanded, "format-button")}
+                        onClick={() => handleTimeClick()}
+                        className={toggleActive(
+                            ddState.timeExpanded,
+                            "format-button",
+                        )}
                     >
                         Format Time
                     </button>
                     <div
                         className={toggleActive(
-                            timeExpanded,
+                            ddState.timeExpanded,
                             "underline-wrapper",
                         )}
                     >
                         <div
-                            className={toggleActive(timeExpanded, "underline")}
+                            className={toggleActive(
+                                ddState.timeExpanded,
+                                "underline",
+                            )}
                         ></div>
                     </div>
                 </div>
-                <div className={toggleActive(timeExpanded, "ul-wrapper")}>
+                <div
+                    className={toggleActive(ddState.timeExpanded, "ul-wrapper")}
+                >
                     <FormatTime />
                 </div>
             </div>
             <div className="sub-drop-down-container">
                 <div
                     className={toggleActive(
-                        dateExpanded,
+                        ddState.dateExpanded,
                         "format-button-wrapper",
                     )}
                 >
                     <button
-                        onClick={() =>
-                            handleClick(
-                                dateExpanded,
-                                setDateExpanded,
-                                setTimeExpanded,
-                            )
-                        }
-                        className={toggleActive(dateExpanded, "format-button")}
+                        onClick={() => handleDateClick()}
+                        className={toggleActive(
+                            ddState.dateExpanded,
+                            "format-button",
+                        )}
                     >
                         Format Date
                     </button>
                     <div
                         className={toggleActive(
-                            dateExpanded,
+                            ddState.dateExpanded,
                             "underline-wrapper",
                         )}
                     >
                         <div
-                            className={toggleActive(dateExpanded, "underline")}
+                            className={toggleActive(
+                                ddState.dateExpanded,
+                                "underline",
+                            )}
                         ></div>
                     </div>
                 </div>
-                <div className={toggleActive(dateExpanded, "ul-wrapper")}>
+                <div
+                    className={toggleActive(ddState.dateExpanded, "ul-wrapper")}
+                >
                     <FormatDate />
                 </div>
             </div>
@@ -345,20 +494,20 @@ function FormatDate(): React.ReactElement {
     if (!context) {
         throw new Error("Context not created");
     }
-    const { clockState, clockDispatch, ddExpanded } = context;
+    const { clockState, clockDispatch, edit } = context;
 
-    if (!ddExpanded) return <></>; // return early if nothing is being edited
+    if (!edit) return <></>; // return early if nothing is being edited
 
     function handleClick(dateFormatIndex: number): void {
-        const actionTypes: ActionType[] = [
-            ActionType.DateFormat0,
-            ActionType.DateFormat1,
-            ActionType.DateFormat2,
-            ActionType.DateFormat3,
-            ActionType.DateFormat4,
-            ActionType.DateFormat5,
-            ActionType.DateFormat6,
-            ActionType.DateFormat7,
+        const actionTypes: ClockAction[] = [
+            ClockAction.DateFormat0,
+            ClockAction.DateFormat1,
+            ClockAction.DateFormat2,
+            ClockAction.DateFormat3,
+            ClockAction.DateFormat4,
+            ClockAction.DateFormat5,
+            ClockAction.DateFormat6,
+            ClockAction.DateFormat7,
         ];
         clockDispatch({ type: `${actionTypes[dateFormatIndex]}` });
     }
@@ -401,33 +550,33 @@ function FormatTime(): React.ReactElement {
     if (!clockContext) {
         throw new Error("Context not found");
     }
-    const { ddExpanded, clockState, clockDispatch } = clockContext;
+    const { clockState, clockDispatch, edit } = clockContext;
 
-    if (!ddExpanded) return <></>; // return early if nothing is being edited
+    if (!edit) return <></>; // return early if nothing is being edited
 
     function handleDispatch(className: string) {
         if (className === "option show-suffix") {
             if (!clockState.showAMPM) {
                 // 24 hour time does not use AM/PM
-                clockDispatch({ type: ActionType.ToggleAMPM });
-                clockDispatch({ type: ActionType.Off24Hour });
+                clockDispatch({ type: ClockAction.ToggleAMPM });
+                clockDispatch({ type: ClockAction.Off24Hour });
             } else {
-                clockDispatch({ type: ActionType.ToggleAMPM });
+                clockDispatch({ type: ClockAction.ToggleAMPM });
             }
             return;
         }
         if (className === "option show-24-hour") {
             if (!clockState.show24Hour) {
                 // 24 hour time does not use AM/PM
-                clockDispatch({ type: ActionType.Toggle24Hour });
-                clockDispatch({ type: ActionType.OffAMPM });
+                clockDispatch({ type: ClockAction.Toggle24Hour });
+                clockDispatch({ type: ClockAction.OffAMPM });
             } else {
-                clockDispatch({ type: ActionType.Toggle24Hour });
+                clockDispatch({ type: ClockAction.Toggle24Hour });
             }
             return;
         }
         if (className === "option show-seconds") {
-            clockDispatch({ type: ActionType.ToggleSeconds });
+            clockDispatch({ type: ClockAction.ToggleSeconds });
             return;
         }
     }
@@ -435,7 +584,6 @@ function FormatTime(): React.ReactElement {
     interface ItemData {
         spanText: string;
         className: string;
-        // action: { type: string };
         handleDispatch: () => void;
         clockState: boolean;
     }
@@ -467,7 +615,7 @@ function FormatTime(): React.ReactElement {
                     <li key={index} className={item.className}>
                         <span>{item.spanText}</span>
                         <CheckBoxSlider
-                            clockState={item.clockState}
+                            toggleState={item.clockState}
                             handleDispatch={item.handleDispatch}
                         />
                     </li>
@@ -479,21 +627,21 @@ function FormatTime(): React.ReactElement {
 
 interface CheckBoxSliderProps {
     handleDispatch: () => void;
-    clockState: boolean;
+    toggleState: boolean;
 }
 function CheckBoxSlider({
     handleDispatch,
-    clockState,
+    toggleState,
 }: CheckBoxSliderProps): React.ReactElement {
     const clockContext = useContext(ClockContext);
     if (!clockContext) {
         throw new Error("ClockContext is null");
     }
 
-    const [on, setOn] = useState<boolean>(clockState);
+    const [on, setOn] = useState<boolean>(toggleState);
     useEffect(() => {
-        setOn(clockState);
-    }, [setOn, clockState]);
+        setOn(toggleState);
+    }, [setOn, toggleState]);
 
     function handleClick(): void {
         setOn(!on);

@@ -34,12 +34,12 @@ export default function SearchBar(): React.ReactElement {
     const [dropDown, setDropDown] = useState<boolean>(false);
     const dropDownButton = useRef<HTMLButtonElement>(null);
     const textInput = useRef<HTMLInputElement>(null);
-    // In the event the user searches something and hits the back button, the
-    //+ browser populates the input field with the previous search...but the
-    //+ input is initialized with "" in React. The searchTerm state is only
-    //+ modified on an onChange event so there is an initial disconnect.
-    //+ Simply pushing to the event loop with a 0ms setTimeout is not enough,
-    //+ so add a generous 250ms.
+    /* In the event the user searches something and hits the back button, the
+     * browser populates the input field with the previous search...but the
+     * input is initialized with "" in React. The searchTerm state is only
+     * modified on an onChange event so there is an initial disconnect.
+     * Simply pushing to the event loop with a 0ms setTimeout is not enough,
+     * so add a generous 250ms. */
     useEffect(() => {
         setTimeout(() => {
             if (textInput.current) {
