@@ -5,9 +5,11 @@ $icon-container-height: 30px;
         &:nth-child(1) {
             background-color: lightgreen;
         }
+
         &:nth-child(2) {
             background-color: lightblue;
         }
+
         &:nth-child(3) {
             background-color: lightcoral;
         }
@@ -19,7 +21,7 @@ $icon-container-height: 30px;
         align-items: start;
         height: 200px;
         max-height: 50px;
-        transition: 300ms max-height ease-in-out;
+        transition: 150ms max-height ease-in-out;
 
         &:hover {
             max-height: 200px;
@@ -43,7 +45,7 @@ $icon-container-height: 30px;
     padding-bottom: 20px;
     overflow: hidden;
     background-color: yellow;
-    transition: 300ms max-height ease-in-out;
+    transition: 150ms max-height ease-in-out;
 
     .tab-group {
         display: grid;
@@ -60,6 +62,7 @@ $icon-container-height: 30px;
             height: 30px;
             background-color: green;
         }
+
         .content {
             background-color: white;
             display: grid;
