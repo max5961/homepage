@@ -1,5 +1,7 @@
 @forward "./reset.css";
 @forward "./components/App.scss";
+@forward "./components/center-container.scss";
 @use "./components/OptionsMenu.scss";
 @use "./components/Clock.scss";
-@use "./components/SearchBarBookmarks.scss";
+@use "./components/SearchBar.scss";
+@use "./components/Bookmarks.scss";
